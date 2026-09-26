@@ -1,41 +1,25 @@
-# Hardhat 开发框架
+Hardhat 是一个专业的以太坊开发环境，提供灵活且易于使用的工具链，可以轻松地编写、测试和部署智能合约。Hardhat 支持 JavaScript/TypeScript 和 **Solidity** 两种测试方式。
 
-> 如果你已经熟练使用 Hardhat ，可以直接跳到[Hardhat 挑战](https://decert.me/quests/10003) ，完成调整领取技能认证 NFT。
-
-
-Hardhat 提供了一个灵活且易于使用的环境，可以轻松地编写、测试和部署智能合约。Hardhat 使用 Node 进行包管理，如果你熟悉 Node 及 Javascript， Hardhat 将非常简单上手。
-
-
-
-**Hardhat**还内置了**Hardhat 网络（Hardhat Node）**，它是为开发而设计的本地以太坊网络。 用来部署合约，运行测试和**调试代码**。
-
-
+**Hardhat 核心特性**：
+- 🚀 **更快的编译和测试**：采用新的 EDR (Ethereum Development Runtime)
+- ✍️ **Solidity 测试**：现在可以用 Solidity 编写测试（类似 Foundry，Hardhat 3 新特性）
+- 🔧 **强大的调试**：内置调试器和 `console.log()` 支持
+- 🌐 **Hardhat Network**：为开发优化的本地以太坊网络
 
 在本文中，我们将介绍：
 
-
-
-1. 创建及配置Hardhat项目
+1. 创建及配置 Hardhat 项目
 2. 编写智能合约
-3. Hardhat 编译合约
-4. 使用 [Ethers.js](https://learnblockchain.cn/ethers_v5/) 和为合约编写自动化测试
-5. 使用 `console.log()`调试 Solidity
-6. 使用 Hardhat 部署合约
-7. 使用 Hardhat Etherscan 进行开源验证。
+3. 使用 Solidity 编写测试
+5. 使用 `console.log()` 调试 Solidity
+6. 部署合约
+7. 代码开源验证
 
+本文参考代码在：https://github.com/lbc-team/hello_hardhat
 
+## 创建及配置 Hardhat 项目
 
-本文对应的代码在：https://github.com/xilibi2003/training_camp_2/tree/main/w1_hardhat
-
-
-
-
-
-## 创建及配置Hardhat项目
-
-
-
-Hardhat 构建在Node.js之上， 使用 Hardhat 要求我们在电脑先安装好Node.js (>= 16.0)， 环境准备可以参考[这里](https://learnblockchain.cn/docs/hardhat/tutorial/setting-up-the-environment.html)。
+Hardhat 构建在 Node.js 之上，使用 Hardhat 要求先安装 Node.js (>= 22.0)，环境准备可以参考[这里](https://hardhat.org/docs/getting-started)。
 
 先创建项目目录：
 
@@ -44,36 +28,15 @@ mkdir hardhat-tutorial
 cd hardhat-tutorial
 ```
 
-初始化 Node 项目：
+初始化 Hardhat 项目：
 
 ```bash
-npm init
+npx hardhat --init
 ```
 
+Hardhat 3 提供了多种项目模板：
 
-
-安装 Hardhat :
-
-```bash
-npm install --save-dev hardhat
 ```
-
-
-
-在安装**Hardhat**的目录下运行：
-
-```bash
-npx hardhat
-```
-
-
-
-使用键盘选择"创建一个新的hardhat.config.js（`Create a JavaScript project`）" ，然后回车。
-
-
-
-```markup{14}
-$ npx hardhat
 888    888                      888 888               888
 888    888                      888 888               888
 888    888                      888 888               888
@@ -83,68 +46,75 @@ $ npx hardhat
 888    888 888  888 888    Y88b 888 888  888 888  888 Y88b.
 888    888 "Y888888 888     "Y88888 888  888 "Y888888  "Y888
 
-👷 Welcome to Hardhat v2.13.0 👷‍
+👷 Welcome to Hardhat v3.1.0 👷
 
-? What do you want to do? …
-❯ Create a JavaScript project
-  Create a TypeScript project
-  Create an empty hardhat.config.js
-  Quit
+? Which version of Hardhat would you like to use? …
+❯ Hardhat 3 Beta (recommended for new projects)
+  Hardhat 2 (older version)
 ```
 
+新项目推荐选择Hardhat 3 ，接下会询问选择项目路径和项目类型：
+```
+? Where would you like to initialize the project?
+
+Please provide either a relative or an absolute path: › .
 
 
-这个 JavaScript Hardhat 工程会默认下载 `hardhat-toolbox 插件`及一些常规设置：
+What type of project would you like to initialize?
+· node-test-runner-viem
+```
 
+我们使用当前路径 . 和 `node-test-runner-viem` , 在安装完依赖后，项目工程目录如下：
 
-
-创建好的Hardhat工程包含文件有：
-
-- `contracts`：智能合约目录
-- `scripts` ：部署脚本文件
-- `test`：智能合约测试用例文件夹。
-- `hardhat.config.js`：配置文件，配置hardhat连接的网络及编译选项。
-
-
+```
+├── contracts/          # 智能合约目录
+│   └── Counter.sol
+│   └── Counter.t.sol  # Solidity 测试
+├── test/              # 测试文件（.ts）
+│   └── Counter.ts
+├── ignition/modules/   # 部署模块（Hardhat Ignition）
+│   └── Counter.ts.     # 描述你想部署哪些合约及初始化等
+└── hardhat.config.ts   # 配置文件
+```
 
 ## 编写合约
 
-合约开发推荐使用 VSCode 编辑器 + [solidity 插件](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity)，在`contracts` 下新建一个合约文件 `Counter.sol` (`*.sol` 是 Solidity 合约文件的后缀名),  复制如下代码：
+合约开发推荐使用 Cursor 编辑器或Google Antigravity + [Solidity 插件](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity)。
 
-```js title=”counter.sol“
-//SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+默认在 `contracts` 目录下会包含一个示例 `Counter.sol`：
+
+```solidity
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.28;
 
 contract Counter {
-    uint counter;
+  uint public x;
 
-    constructor() {
-        counter = 0;
-    }
+  event Increment(uint by);
 
-    function count() public {
-        counter = counter + 1;
-    }
+  function inc() public {
+    x++;
+    emit Increment(1);
+  }
 
-    function get() public view returns (uint) {
-        return counter;
-    }
+  function incBy(uint by) public {
+    require(by > 0, "incBy: increment should be positive");
+    x += by;
+    emit Increment(by);
+  }
 }
+
 ```
 
-接下来就可以编译这个合约了。
+### 使用 OpenZeppelin 等第三方库
 
-### 使用OpenZepplin 等第三方库
-
-在编写合约时，尽量不要重复造轮子，基于优质开源的第三方库，不仅可以提交效率，还可以让我们的合约代码更安全，例如要开发一个 Token，可以用npm 安装OpenZepplin 库：
+在编写合约时，基于优质开源的第三方库可以提高效率和安全性。例如开发一个 Token，可以用 npm 安装 OpenZeppelin 库：
 
 ```bash
-npm install @openzeppelin/contracts --save-dev
+npm install @openzeppelin/contracts
 ```
 
-
-
-然后在合约中 `import`  相应库中的合约文件及可。
+然后在合约中 `import` 相应的库文件：
 
 ```solidity
 pragma solidity ^0.8.0;
@@ -152,438 +122,406 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Token is ERC20 {
-  constructor(uint256 initialSupply) ERC20("Token Name", "Token Symbol") {
-    _mint(msg.sender, initialSupply);
-  }
+    constructor(uint256 initialSupply) ERC20("Token Name", "Token Symbol") {
+        _mint(msg.sender, initialSupply);
+    }
 }
 ```
 
 ## 编译合约
 
+`hardhat.config.t's` 有默认的 Solidity 编译器配置：
 
-
-`hardhat.config.js` 有默认的Solidity 编译器配置：
-
-```
+```javascript
 require("@nomicfoundation/hardhat-toolbox");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.18",
+  solidity: "0.8.28",
 };
 ```
 
+在终端中运行编译命令：
 
-
-因此我们直接编译合约即可，在终端中运行 `npx hardhat compile` 。 `compile`任务是内置任务之一。
+```bash
+npx hardhat compile
+```
 
 ```
-$ npx hardhat compile
-Compiling 1 file with 0.8.18
+Compiling 1 file with 0.8.28
 Compilation finished successfully
 ```
 
-合约已成功编译了。
+成功编译后，会在 `artifacts/contracts/` 目录下生成包含 ABI 和字节码的 JSON 文件。
 
-
-
-成功编译后，会在 `artifacts/contracts/`  目录下生成`Counter.json` 和 build-info， `Counter.json`包含了智能合约的 ABI 、字节码（Bytecode）等。
-
-
-
-:::tip
-
-智能合约的 **ABI（Application Binary Interface）**信息，其中包括了合约的函数、事件等接口信息。这个文件通常会在与其他合约交互时使用，因为它可以被其他合约和 DApp 使用。
-
-`Bytecode ` 是部署合约所需的字节码（也称为创建时字节码），部署合约时，就是把该字节码作为交易的输入数据发送链上。:::
-
-:::
-
-
+> **说明**：
+> - **ABI (Application Binary Interface)**：包含合约的函数、事件等接口信息
+> - **Bytecode**：部署合约所需的字节码
 
 ## 编写测试用例
 
-为智能合约编写自动化测试至关重要，因为事关用户资金。 
+为智能合约编写自动化测试至关重要。**Hardhat 3 开始支持两种测试方式**：1. 使用Solidity 测试 ，2. 使用 typescript 编写测试。
 
-在我们的测试中，使用 Harhdat 内置的网络，使用[ethers.js](https://learnblockchain.cn/ethers_v5/)与前面的合约进行交互，并使用 [Mocha](https://mochajs.org/) 作为测试运行器。
+我们这里使用 Solidity 编写测试，类似 Foundry 的体验(Hardhat 3 新特性)，非常适合熟悉 Solidity 的开发者。
 
+在 `test` 目录下创建 `Counter.t.sol`：
 
+```solidity title="Counter.t.sol"
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-在项目 `test`下，并创建一个名为`Counter.js`的新文件：
+import {Test} from "forge-std/Test.sol";
+import {Counter} from "../contracts/Counter.sol";
 
-```js title="Counter.js"
-const { ethers } = require("hardhat");
-const { expect } = require("chai");
+contract CounterTest is Test {
+    Counter public counter;
 
-let counter;
+    function setUp() public {
+        counter = new Counter();
+    }
 
-describe("Counter", function () {
-  async function init() {
-    const [owner, otherAccount] = await ethers.getSigners();
-    const Counter = await ethers.getContractFactory("Counter");
-    counter = await Counter.deploy();
-    await counter.deployed();
-    console.log("counter:" + counter.address);
-  }
+    function test_InitialValue() public view {
+      require(counter.x() == 0, "Initial value should be 0");
+    }
 
-  before(async function () {
-    await init();
-  });
+    function testFuzz_Inc(uint8 x) public {
+      for (uint8 i = 0; i < x; i++) {
+        counter.inc();
+      }
+      require(counter.x() == x, "Value after calling inc x times should be x");
+    }
 
-  // 
-  it("init equal 0", async function () {
-    expect(await counter.get()).to.equal(0);
-  });
+    function test_IncByZero() public {
+      vm.expectRevert();
+      counter.incBy(0);
+    }
 
-  it("add 1 equal 1", async function () {
-    let tx = await counter.count();
-    await tx.wait();
-    expect(await counter.get()).to.equal(1);
-  });
+}
+```
 
-});
+**代码说明**：
+
+1. **继承 Test**：从 `forge-std/Test.sol` 继承测试基类
+2. **setUp()**：每个测试前执行的初始化函数
+3. **test_ 前缀**：测试函数必须以 `test_` 开头
+4. **断言**：使用 `assertEq`、`assertTrue` 等断言函数
+5. **模糊测试**：`testFuzz_` 前缀的函数支持模糊测试
+
+运行 Solidity 测试：
+
+```bash
+npx hardhat test
+```
+
+输出：
+
+```
+  contracts/Counter.t.sol:CounterTest
+    ✔ test_InitialValue()
+    ✔ test_IncByZero()
+    ✔ testFuzz_Inc(uint8) (runs: 256)
 
 ```
 
+## 使用 console.log 调试合约
 
+在 Hardhat Network 上运行合约时，可以在 Solidity 代码中使用 `console.log()` 打印日志：
 
-在终端上运行`npx hardhat test`。 你应该看到以下输出：
-
-
-
-```
-> npx hardhat test
-
-
-  Counter
-counter:0x5FbDB2315678afecb367f032d93F642f64180aa3
-    ✔ init equal 0
-    ✔ add 1 equal 1
-
-  2 passing (1s)
-```
-
-
-
-
-
-这意味着测试通过了。 现在我们解释主要代码：
-
-
-
-```js
-  const Counter = await ethers.getContractFactory("Counter");
-```
-
-ethers.js中的`ContractFactory`是用于部署新智能合约的抽象，因此此处的`Counter`是用来实例合约的工厂。
-
-
-
-```js
-counter = await Counter.deploy();
-```
-
-在`ContractFactory`上调用`deploy()`将启动部署，并返回解析为`Contract`的`Promise`。 该对象包含了智能合约所有函数的方法。
-
-```
-let tx = await counter.count();
-await tx.wait();
-```
-
-
-
-在`counter` 上调用合约方法， 并等待交易执行完毕。
-
-注意，默认情况下， `ContractFactory`和`Contract`实例连接到第一个[签名者（Singer）](https://learnblockchain.cn/ethers_v5/)。
-
-若需要使用其他的签名这， 可以使用[合约实例connect 到另一个签名者](https://learnblockchain.cn/ethers_v5/api/contract/example/#example-erc-20-contract--methods)， 如 `counter.connect(otherAccount)`
-
-```js
-expect(await counter.get()).to.equal(0);
-```
-
-判断相等，我们使用[Chai](https://www.chaijs.com/)，这是一个断言库。 这些断言函数称为“匹配器”，在此实际上使用的“匹配器”来自[Hardhat Chai Matchers](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-chai-matchers)。
-
-
-
-## 使用 Console.log  调试合约
-
-在**Hardhat Node **节点上运行合约和测试时，你可以在Solidity代码中调用`console.log()`打印日志信息和合约变量，可以方便我们调试代码。
-
-在合约代码中导入**Hardhat **的`console.log`就可以使用它。
-
-
-
-```js {3}
+```solidity
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
 contract Counter {
-    uint public counter;
+  uint256 public count;
 
-    constructor(uint x) {
-        counter = x;
-    }
+  function inc() public {
+    x++;
 
-    function count() public {
-        counter = counter + 1;
-        console.log("counter is %s ", counter);
-    }
-
+    console.log("x is now:", x);
+    emit Increment(1);
+  }
 }
 ```
 
 
+运行测试时会输出日志：
 
-就像在JavaScript中使用一样, 将一些`console.log`添加函数中，运行测试时，将输出日志记录：
-
-```
-> npx hardhat test
-
-  Counter
-counter:0x5FbDB2315678afecb367f032d93F642f64180aa3
-    ✔ init equal 0
-counter is 1
-    ✔ add 1 equal 1 (38ms)
-
-
-  2 passing (1s)
+```bash
+npx hardhat test
 ```
 
+```
 
+Running node:test tests
 
-可以在[这里](https://learnblockchain.cn/docs/hardhat/hardhat-network/#console-log)了解更多 console.log 。 
+x is now: 1
+```
 
-
+更多 console.log 用法参考[文档](https://hardhat.org/docs/reference/console-log)。
 
 ## 部署合约
 
- 其实我们在测试时， 合约已经部署到了Hardhat 内置的网络上，部署合约我们需要编写一个部署脚本。
+Hardhat 3 推荐使用 **Hardhat Ignition** 进行部署，它是一个声明式的部署系统。
 
+### 编写部署模块
 
+在 `ignition/modules` 目录有一个默认的部署脚本 `Counter.ts`：
 
-在`scripts`文件夹，新建一个`deploy.js` 用来写部署脚本，部署脚本其实和前面测试时 `init` 函数类似：
+```ts
+import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
-```js
-const { ethers } = require("hardhat");
+export default buildModule("CounterModule", (m) => {
+  const counter = m.contract("Counter");
 
-async function main() {
+  m.call(counter, "incBy", [5n]);
 
-	 const Counter = await ethers.getContractFactory("Counter");
-   const counter = await Counter.deploy();
-   await counter.deployed();
-
-  console.log("Counter address:", counter.address);
-}
-
-main();
-```
-
-
-
-运行 `npx hardhat run scripts/deploy.js` 时， 可以合约会部署到Hardhat 内置网络上。
-
-```
-> npx hardhat run scripts/deploy.js
-Counter address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+  return { counter };
+});
 
 ```
 
+稍微解释一下这个脚本：
+
+buildModule 函数是创建部署模块的核心工具。
+
+```
+export default buildModule("CounterModule", (m) => { ... });
+```
+
+导出一个名为 "CounterModule" 的模块。m 是一个构建器对象（Module Builder），用它来定义所有的部署操作。Ignition 会记录这些操作并在执行时按照确定的顺序运行。
+
+```
+const counter = m.contract("Counter");
+```
+
+告诉 Ignition 部署名为 "Counter" 的合约, 它会在 contracts/ 目录下寻找 
+Counter.sol 对应的编译产物。counter 是一个代表该合约实例的“未来对象”（Future），你可以把它传给后续的操作使用。
+
+```
+m.call(counter, "incBy", [5n]);
+```
+
+在 counter 合约部署完成后，调用它的 incBy 函数。Ignition 会自动发一笔交易去执行 incBy(5)
+
+```
+return { counter };
+```
+
+返回在这个模块中部署的合约实例。这让其他模块可以通过 m.useModule(...) 来引用并依赖这个合约。
 
 
+### 部署到本地网络
+
+Hardhat 自带一个本地模拟网络： Hardhat Network ，启动 Hardhat Network：
+
+```bash
+npx hardhat node
+```
+
+在另一个终端部署：
+
+```bash
+npx hardhat ignition deploy ignition/modules/Counter.ts --network localhost
+```
+
+输出：
+
+```
+Hardhat Ignition 🚀
+
+Deploying [ CounterModule ]
+
+Batch #1
+  Executed CounterModule#Counter
+
+Batch #2
+  Executed CounterModule#Counter.incBy
+
+[ CounterModule ] successfully deployed 🚀
+
+Deployed Addresses
+
+CounterModule#Counter - 0x5FbDB2315678afecb367f032d93F642f64180aa3
+```
+
+### 部署到真实网络
+
+真实网络可以是测试网，也可以主网，需要先准备能支付费用的账号及区块链节点的 RPC  URL。
+
+**部署账号领水**
+如果是测试网，我们可以在水龙头获取测试币，这些是当前 Sepolia 网络可用的水龙头：
+
+- [Alchemy Sepolia Faucet](https://sepoliafaucet.com/)
+- [Infura Sepolia Faucet](https://www.infura.io/faucet/sepolia)
+- [LearnWeb3 Faucet](https://learnweb3.io/faucets/sepolia)
+
+在水龙头网站粘贴你的钱包地址，领取免费测试币，通常每次可以获得 0.5-1 ETH 的测试币，足够进行多次部署。
+
+**获取 RPC URL**
+
+在 Chainlist.org 可以找到很多免费的 RPC 节点。这些节点服务商： [Alchemy](https://www.alchemy.com/)、 [Infura](https://infura.io/)、 [QuickNode](https://www.quicknode.com/) 也有很多的免费访问额度。
 
 
-为了在运行任何任务时指示**Hardhat**连接到特定的EVM网络，可以使用`--network`参数。 像这样：
+#### 配置环境变量
 
-```js
-npx hardhat run scripts/deploy.js --network <network-name>
+使用 `.env` 来配置敏感信息, 确保 `.env` 不会提交到 github 中
+
+```
+SEPOLIA_RPC_URL="..."
+SEPOLIA_PRIVATE_KEY="..."
 ```
 
 
+#### 配置 hardhat.config.ts
 
-`network-name` 需要在 `hardhat.config.js` 文件中进行配置：
+在 `hardhat.config.ts` 中添加测试网配置：
 
-```js
-require("@nomicfoundation/hardhat-toolbox");
+```ts
+import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
+import { defineConfig } from "hardhat/config";
+import * as dotenv from "dotenv";
+dotenv.config();
 
-// 填入自己的私钥或助记词，
-const PRIVATE_KEY1 = "0x.... YOUR PRIVATE KEY1";
-const PRIVATE_KEY2 = "0x....  YOUR PRIVATE KEY1";
-const Mnemonic = "YOUR Mnemonic";
+export default defineConfig({
+  plugins: [hardhatToolboxViemPlugin],
+  solidity: "0.8.28",
+  networks: {
+    sepolia: {
+      type: "http",
+      chainType: "l1",
+      url: process.env.SEPOLIA_RPC_URL,
+      accounts: [process.env.SEPOLIA_PRIVATE_KEY],
+    },
+  },
+});
+```
 
+**配置说明**：
+- `type: "http"`：使用 HTTP 协议连接
+- `chainType: "l1"`：标识这是以太坊 L1 网络
+- `url`：从配置变量读取 RPC URL
+- `accounts`：从配置变量读取私钥
+
+#### 执行部署
+
+确保合约已成功编译，然后执行如下命令部署到 Sepolia 测试网：
+
+```bash
+npx hardhat ignition deploy ignition/modules/Counter.ts --network sepolia
+? Confirm deploy to network sepolia (11155111)? › (y/N)
+```
+
+**部署过程示例**：
+
+```
+Hardhat Ignition 🚀
+
+Deploying [ CounterModule ]
+
+Batch #1
+  Executed CounterModule#Counter
+
+Batch #2
+  Executed CounterModule#Counter.incBy
+
+[ CounterModule ] successfully deployed 🚀
+
+Deployed Addresses
+
+CounterModule#Counter - 0x04E5913F688563F30304FeFC1484ff71a54E27eA
+```
+
+#### 验证部署结果
+
+部署成功后，你可以：
+
+1. **在区块浏览器查看**：
+   - 访问 [Sepolia Etherscan](https://sepolia.etherscan.io/)
+   - 搜索合约地址（如上面的 `0x04E5913F688563F30304FeFC1484ff71a54E27eA`）
+   - 查看合约交易记录
+
+
+2. **查看部署记录**：
+   Hardhat Ignition 会在 `ignition/deployments` 目录保存部署记录，包含合约地址和部署参数。
+
+#### 部署过程常见问题
+
+**问题 1：insufficient funds for gas**
+```
+Error: insufficient funds for gas * price + value
+```
+**解决方案**：账户余额不足，需要从水龙头获取更多测试币。
+
+**问题 2：nonce too low**
+```
+Error: nonce too low
+```
+**解决方案**：删除 `ignition/deployments` 目录下的部署记录，或使用 `--reset` 参数重新部署：
+```bash
+npx hardhat ignition deploy ignition/modules/Counter.ts --network sepolia --reset
+```
+
+**问题 3：无法连接到 RPC**
+```
+Error: could not detect network
+```
+**解决方案**：
+- 检查 RPC URL 是否正确
+- 检查网络连接是否正常
+- 尝试使用其他 RPC 提供商
+
+## 代码开源验证
+
+代码开源可以增加合约的透明度，是建立信任的重要步骤。
+
+### 配置
+
+Hardhat 使用 `hardhat-verify` 插件（`hardhat-toolbox` 已包含）：
+
+```javascript
 
 module.exports = {
-  solidity: "0.8.9", // solidity的编译版本
+  solidity: ...
   networks: {
-    goerli: {
-      url: "https://eth-goerli.api.onfinality.io/public",
-      accounts: [PRIVATE_KEY1,PRIVATE_KEY2],
-      chainId: 5,
+    sepolia: {
+      url: "https://rpc.sepolia.org",
+      accounts: [process.env.PRIVATE_KEY],
     },
-    
-     mumbai: {
-      url: "https://endpoints.omniatech.io/v1/matic/mumbai/public",
-      accounts: {
-        mnemonic: Mnemonic,
-      },
-      chainId: 80001,
+  },
+  verify: {
+    etherscan: {
+      apiKey: process.env.ETHERSCAN_API_KEY,
     },
-  }
+  },
 };
 ```
 
+如果是将代码开源到 Blockscout 和 Sourcify ，不需要进行任何配置，但开源到 Etherscan 需要 Etherscan API 密钥， 在 https://etherscan.io 的「我的账户」页面，可以创建一个 API KEY。
 
+https://hardhat.org/docs/guides/smart-contract-verification
 
-以上配置了两个网络，一个是以太坊测试网 `goerli`， 一个是 Polygon 测试网`mumbai`， 我们可以在 https://chainlist.org 找到每个网络的节点 URL 及 chainID。
+### 执行验证
 
-在网络配置中，需要提供提交交易账号， 可以通过私钥或`助记词`  进行配置，这里配置的账号（需要提前充币进入到账号中），在hardhat 脚本中（测试及部署脚本）调用`getSigners` 即可获得：
+部署后验证合约：
 
-```
-const [owner, otherAccount] = await ethers.getSigners();
-```
-
-
-
-一个私钥对应一个Singer，助记词则对应无数个 Singer ， 为每个项目生成一个独立的账号是比较推荐的做法，使用 [ChainTool 开源工具](https://chaintool.tech/generateWallet) 可以生成账号。
-
-:::tip
-
-助记词可以推导出无数了私钥，可参考：[BIP39](https://learnblockchain.cn/2018/09/28/hdwallet)
-
-:::
-
-
-
-另外要注意， 在 Goerli 上进行部署，需要将Goerli-ETH发送到将要进行部署的地址中。 可以从水龙头免费或一些测试币，这是Goerli的一个水龙头:
-
-- [Alchemy Goerli Faucet](https://goerlifaucet.com/)
-
-
-
-最后运行：
-
-```
-npx hardhat run scripts/deploy.js --network goerli
+```bash
+npx hardhat verify --network sepolia 0x合约地址
 ```
 
-如果一切顺利，你应该看到已部署的合约地址。
+如果合约构造函数有参数：
 
-
-
-## 代码开源验证 
-
-
-
-智能代码开源会增加了合约的透明度和可靠性，是项目建立信任很重要的一个步骤。
-
-在 `hardhat-toolbox` 工具箱里，包含了 [hardhat-etherscan](https://hardhat.org/hardhat-runner/plugins/nomiclabs-hardhat-etherscan) 插件用于验证已经部署到区块链网络上的智能合约代码与源代码是否匹配，在完成验证后在区块链浏览器中合约标签上会出现✅， 如图：
-
-
-
-![image-20230313104044517](https://img.learnblockchain.cn/pics/20230313104045.png)
-
-
-
-在部署智能合约时，合约字节码会被写入到区块链中，这意味着其他人无法检查合约的源代码。代码验证的过程是将已部署合约的字节码与原始Solidity代码再次编译后与部署的字节码进行比较，确保它们是一致的。
-
-
-
-相比在区块链浏览器上上传代码验证， hardhat-etherscan 有很多优点，否则会自动使用 hardhat config 值设置的编译器选项，并且当代码中引用的第三方库或合约， hardhat-etherscan 能自动探测并处理。
-
-
-
-开源验证的步骤是：
-
-1. 安装 `hardhat-toolbox`  或 `hardhat-etherscan` ， 这一步我们这里已经完成，因为在初始化项目的时候安装了 `hardhat-toolbox`  ， 如果没有安装，可以使用以下命令安装
-
-   ```
-   npm install --save-dev @nomiclabs/hardhat-etherscan
-   ```
-
-   
-
-2. 在 `hardhat.config.js` 中配置您的 Etherscan API 密钥和网络设置，例如：
-
-```js
-  require("@nomicfoundation/hardhat-toolbox");
-  或
-  // require("@nomiclabs/hardhat-etherscan");
-  
-  etherscan: {
-    apiKey: ""
-  },
-  
- 
+```bash
+npx hardhat verify --network sepolia 0x合约地址 "参数1" "参数2"
 ```
 
-<details>
-  <summary>如何获取 Etherscan API 密钥？</summary>
-  <div> 1. 访问部署网络<b>对应主网</b>的 Etherscan 网站，并注册一个账号（如果还没有账号的话）。
-    <br/>
-    2. 登录你的账号并进入 Etherscan 的「我的帐户」页面。
-    <br/>
-    3. 点击页面左侧的「API-KEYs」标签页。
-    <br/>
-4. 在页面上方的「Create New API KEY」部分，输入 API 密钥的名称和描述，然后选择需要访问的 API 权限。
-    <br/>
-    5. 点击「Generate」按钮来生成 API 密钥。
-  </div>
-</details>
+验证成功后，在 Etherscan 上可以看到合约源代码：
 
-
-
-
-3. 执行验证命令：
-
-   ```
-   npx hardhat verify <deployed-contract-address> "参数(若有)" --network <network-name> 
-   ```
-   
-   例如，要在 goerli  网络上验证合约，可以运行以下命令：
-   
-   ```
-   npx hardhat verify 0x..... --network goerli
-   ```
-
-该命令会为我们上传合约代码并验证其源代码。如果一切顺利（网络顺畅的话），在 Etherscan 上看到的合约被成功验证。
-
-
-## Hardhat 插件（Plugin）的使用
-
-上面代码开源验证时，使用了`hardhat-etherscan`插件，其实也可以使用 [hardhat-verify](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#hardhat-verify) 插件。
-
-在 https://hardhat.org/hardhat-runner/plugins 链接可以找到当前使用较多的插件，例如：[hardhat-gas-reporter](https://www.npmjs.com/package/hardhat-gas-reporter) 可以对部署合约及函数执行的Gas消耗给出报告；[solidity-coverage](https://www.npmjs.com/package/solidity-coverage) 可以对测试覆盖率给出报告。
-
-
-## 参考文档
-
-
-
-示例非常简单， 更多使用方法，可参考文档：
-
-- Hardhat 官方文档：https://hardhat.org/getting-started/
-
-- Hardhat 中文文档：https://learnblockchain.cn/docs/hardhat/getting-started/
-
-- Harhdat 入门教程：https://learnblockchain.cn/docs/hardhat/tutorial/
-
-- Ethers.js 文档：https://learnblockchain.cn/ethers_v5/
-
-  
+![验证成功](https://img.learnblockchain.cn/pics/20230313104045.png)
 
 
 ## 小结
 
-本文介绍了 Hardhat 开发框架的一些基本概念和使用方法，了解了如何使用 Hardhat 进行合约编译、部署、调试及测试，在开发中要**经常查看文档**，了解更多Hardhat 用法。
+Hardhat 也是一个强大的以太坊开发框架，在 Hardhat 3 后可以同时支持 Solidity 和 JavaScript 两种测试方式，缩小了与 Foundry 的差距，给开发者提供了更灵活的选择！
 
-
-
-Hardhat 的使用你掌握了吗？ 去[挑战](https://decert.me/quests/10003)一下看看，挑战完成你就可以领取到一枚技能认证 NFT。
-
-\------
-
-来 [DeCert.me](https://decert.me/quests/10003) 码一个未来，DeCert 让每一位开发者轻松构建自己的可信履历。
-DeCert.me 由登链社区 [@UpchainDAO](https://twitter.com/upchaindao) 孵化，欢迎 [Discord 频道](https://discord.com/invite/kuSZHftTqe) 一起交流。
-
-本教程来自贡献者 [@Tiny熊](https://twitter.com/tinyxiong_eth)。
+如果你是一名 JavaScript/TypeScript 开发者，可以尝试试试使用 Hardhat，如果想纯 Solidity 开发，Foundry 则是更好的选择。

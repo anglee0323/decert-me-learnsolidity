@@ -1,8 +1,14 @@
 # Dependencies
 /node_modules
+myenv/
+
+scripts/__pycache__/
+
+scripts/published_articles.json
 
 # Production
 /build
+.claude/
 
 # Generated files
 .docusaurus

@@ -1,16 +1,12 @@
-# 合约如何接收 ETH
+我们要把合约的ETH 转出是很容易的，我们在[地址](https://learnblockchain.cn/article/22565)一节已经介绍过。
+
+而当我们要向合约里转入ETH时，情况比我们想象的复杂一些，被转入的合约需要明确表达其可以接收 ETH，以防因合约没有处理的ETH的，导致ETH永远锁死在合约中。
+
+> 提示： ERC20 代币向合约转账时，并没有对合约进行类似的检查，因此也时不时会发生 [ERC20](https://learnblockchain.cn/tags/ERC20?map=EVM)  因误转入合约而锁死。
 
 
 
-我们要把合约的ETH 转出是很容易的，我们在[地址](./8_array.md)一节已经介绍过。
-
-而当我们要向合约里转入ETH时，情况比我们想象的复杂一些，被转入的合约需要明确表达其可以接收 ETH，以反正因合约没有处理的ETH的，导致ETH永远锁死在合约中。
-
-> 提示： ERC20 代币向合约转账时，并没有对合约经常类似的检查，因此也时不时会发生 ERC20  因误转入合约而锁死。
-
-
-
-可以在合约中明确声明两个函数来表示合约时可以接收 ETH， 他们是 `receive` 函数和 `fallback`函数。
+可以在合约中明确声明两个函数来表示合约可以接收 ETH， 他们是 `receive` 函数和 `fallback`函数。
 
 `receive` 函数和 `fallback`函数都是在转账时被动调用的，通常称为：回调函数，表示有转账了，告诉我（合约）一下。
 
@@ -45,7 +41,7 @@ contract testPayable {
 
 部署后，`testPayable` 合约的余额为0 ， 在 `Remix` 如何给合约地址转账呢？ 
 
- 介绍一个技巧，在[以太坊核心概念](../ethereum/1_evm_core.md#以太坊交易)中，转账交易与调用合约函数的差别在于有没有附加data数据，若data为空即是转账。在Remix 中，提供了一个底层交易方法，可以输入任意的附加data数据， 因此我们只要在这个底层交易不填入附加data数据就可以实现向合约转账， 因此只要如下图操作，就可以实现转账：
+ 介绍一个技巧，在[以太坊核心概念](https://learnblockchain.cn/article/22542)中，转账交易与调用合约函数的差别在于有没有附加data数据，若data为空即是转账。在Remix 中，提供了一个底层交易方法，可以输入任意的附加data数据， 因此我们只要在这个底层交易不填入附加data数据就可以实现向合约转账， 因此只要如下图操作，就可以实现转账：
 
 
 
@@ -59,9 +55,9 @@ contract testPayable {
 
 大家可以做一个对比验证，如果`testPayable` 合约没有实现`receive`函数，此时转账交易会抛出异常，合约无法接收ETH。
 
-当对合约进行转账时（不是使用MetaMask钱包转账，还是合约中使用`addr.send()`或者`addr.transfer()`对合约转账），合约在收到ETH时会执行`receive`函数。
+当对合约进行转账时（不论使用MetaMask钱包转账，还是合约中使用`addr.send()`或者`addr.transfer()`对合约转账），合约在收到ETH时会执行`receive`函数。
 
-若是使用`addr.send()`或者`addr.transfer()`对合约转账，EVM在执行 transfer 和 send 函数只使用固定的 2300 gas， 这个gas 基本上只够`receive`函数输出一条日志，如果`receive`函数有更多逻辑，就需要使用[底层调用call](../solidity-adv/addr_call.md)对合约转账:
+若是使用`addr.send()`或者`addr.transfer()`对合约转账，EVM在执行 transfer 和 send 函数只使用固定的 2300 gas， 这个gas 基本上只够`receive`函数输出一条日志，如果`receive`函数有更多逻辑，就需要使用[底层调用call](https://learnblockchain.cn/article/22616)对合约转账:
 
 
 
@@ -88,13 +84,9 @@ function safeTransferETH(address to, uint256 value) internal {
 
 
 
-:::note
-
-合约需要定义 receive 函数才能接收以太币，是在通常我们处理的转账情况。
-
-有一些例外，即便合约没有定义 receive 函数， 验证者的出块和交易奖励依旧可以打入到该合约。另外在销毁合约时（selfdestruct）被销毁合约的ETH需要转到另一个地址，或后者是合约，也不要求定义 receive 函数。
-
-:::
+> 合约需要定义 receive 函数才能接收以太币，是在通常我们处理的转账情况。
+>
+> 有一些例外，即便合约没有定义 receive 函数， 验证者的出块和交易奖励依旧可以打入到该合约。另外在销毁合约时（selfdestruct）被销毁合约的ETH需要转到另一个地址，或后者是合约，也不要求定义 receive 函数。
 
 
 
@@ -170,9 +162,9 @@ contract Caller {
 }
 ```
 
-以上代码，使用了地址上的底层调用，来模拟调用不存在的函数，这部分内容将在 [地址高阶用法](../solidity-adv/addr_call.md) 进一步介绍。
+以上代码，使用了地址上的底层调用，来模拟调用不存在的函数，这部分内容将在 [地址高阶用法](https://learnblockchain.cn/article/22616) 进一步介绍。
 
-再次提醒，当使用合约中使用send和transfer向合约转账时，EVM 仅会提供 2300 gas来执行， 如果`receive`或`fallback`函数的实现需要较多的运算量，会导致转账失败。
+再次提醒，当使用合约中使用send和transfer向合约转账时，[EVM](https://learnblockchain.cn/tags/EVM?map=EVM) 仅会提供 2300 gas来执行， 如果`receive`或`fallback`函数的实现需要较多的运算量，会导致转账失败。
 
 
 
@@ -227,23 +219,22 @@ contract testPayable {
 
 ## 小结
 
-提炼本节的重点：这一节，我们介绍了合约如何接收 ETH，理解了  `receive` 和 `fallback` 函数的作用，以及`payable` 修饰符的作用，可以总结为一下几句话：
+本节介绍了合约如何接收 ETH，理解了 `receive` 和 `fallback` 函数的作用，以及 `payable` 修饰符的作用：
 
-1. `payable` 修饰符表示该函数可以接收 ETH
-2. `receive` 函数是在合约可以接收 ETH 调用的函数。
-3.  `fallback` 函数是在匹配不到对应的函数（`receive` 函数或其他函数找不到）时被调用的函数。
+1. **`payable` 修饰符**：表示该函数可以接收 ETH
+2. **`receive` 函数**：在合约接收 ETH（且无 calldata）时被调用的函数
+3. **`fallback` 函数**：在匹配不到对应的函数（`receive` 函数或其他函数找不到）时被调用的函数
 
-
-
-我画了一个图，`receive` 和 `fallback` 函数在什么时候被调用就一目了然了。
+我画了一个图，`receive` 和 `fallback` 函数在什么时候被调用就一目了然了：
 
 ![image-20230703223858675](https://img.learnblockchain.cn/pics/20230703223900.png!decert.logo.water)
 
-\------
+理解这些机制对于编写安全的[智能合约](https://learnblockchain.cn/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6)非常重要，可以避免 ETH 被永久锁定在合约中。
 
-来 [DeCert.me](https://decert.me/quests/10003) 码一个未来，DeCert 让每一位开发者轻松构建自己的可信履历。
+### 进阶学习
 
+想了解更多关于合约接收 ETH 的知识，可以参考：
 
-DeCert.me 由登链社区 [@UpchainDAO](https://twitter.com/upchaindao) 孵化，欢迎 [Discord 频道](https://discord.com/invite/kuSZHftTqe) 一起交流。
-
-本教程来自贡献者 [@Tiny熊](https://twitter.com/tinyxiong_eth)。
+- [底层调用](https://learnblockchain.cn/article/22616) - 深入理解 call、delegatecall 和 staticcall
+- [重入攻击](https://learnblockchain.cn/article/22675) - 学习在接收 ETH 时如何防范重入攻击
+- [支付模式](https://learnblockchain.cn/article/22658) - 学习[智能合约](https://learnblockchain.cn/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6)中的支付最佳实践

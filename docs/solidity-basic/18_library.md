@@ -1,8 +1,6 @@
-# 库
-
 ## 理解库
 
-在软件开发中，有两个方式来实现代码的重用，一个是**[继承](./16_is.md)**，一个是**组合**。库（Library）就是通过组合的方式来实现代码的复用。
+在软件开发中，有两个方式来实现代码的重用，一个是**[继承](https://learnblockchain.cn/article/22558)**，一个是**组合**。库（Library）就是通过组合的方式来实现代码的复用。
 
 下面的图示了继承和组合的区别：
 
@@ -82,7 +80,7 @@ contract TestMax {
 
 ##  链接库
 
-如果库代码内有[公共或外部函数](./2_solidity_layout.md#变量与函数的可见性)，库就可以被单独部署，它在以太坊链上有自己的地址，引用合约在部署合约的时候，需要通过库地址把库“链接”进合约里，合约是通过[委托调用](../solidity-adv/addr_call.md)的方式来调用库函数的。
+如果库代码内有[公共或外部函数](https://learnblockchain.cn/article/22553)，库就可以被单独部署，它在以太坊链上有自己的地址，引用合约在部署合约的时候，需要通过库地址把库“链接”进合约里，合约是通过[委托调用](https://learnblockchain.cn/article/22616)的方式来调用库函数的。
 
 下图是一个内嵌库和链接库在部署后的对比图：
 
@@ -94,7 +92,7 @@ contract TestMax {
 
   
 
-把前面的Math库的add函数修改为外部函数，就可以通过链接库的方式来使用，示例代码如下：
+把前面的Math库的 `max` 函数修改为外部函数，就可以通过链接库的方式来使用，示例代码如下：
 
 ```solidity
 pragma solidity ^0.8.19;
@@ -108,7 +106,7 @@ library Math {
 }
 ```
 
-`TestMax`代码不用作任何的更改，不过因为`Math`库是独立部署的， `TestMax`合约要调用`Math`库就必须先知道后者的地址，这相当于`TestMax`合约会依赖于`Math`库，因此部署`TestMax`合约会有一点不同，需要让 `TestMax`合约与`Math`库建立链接， Solidity 开发框架会帮助我们进行链接，以[Hardhat](../tools/4_hardhat.md) 为例，部署脚本这样写就好：
+`TestMax`代码不用作任何的更改，不过因为`Math`库是独立部署的， `TestMax`合约要调用`Math`库就必须先知道后者的地址，这相当于`TestMax`合约会依赖于`Math`库，因此部署`TestMax`合约会有一点不同，需要让 `TestMax`合约与`Math`库建立链接， [Solidity](https://learnblockchain.cn/course/93) 开发框架会帮助我们进行链接，以[Hardhat](https://learnblockchain.cn/article/22640) 为例，部署脚本这样写就好：
 
 
 
@@ -200,25 +198,15 @@ contract C {
 
 ## 小结
 
-本文，我们学习了库的的概念， 总结要点：
+- **库定义**：使用 `library` 关键字定义，是函数的封装，主要用于代码复用
+- **库特点**：
+  - 库是无状态的，不能有状态变量
+  - 不能给库发送 Ether
+  - 不能被继承，也不能继承其他合约
+- **库的使用方式**：
+  - **Internal 函数**：如果库函数都是 internal 的，库代码会嵌入到合约中
+  - **Public/External 函数**：库需要单独部署，EVM 使用 delegatecall 调用库方法
+- **类型扩展**：使用 `using LibName for Type` 语法给类型扩展功能，如 `using Math for uint`
 
-* 库是函数的封装， 主要用于代码复用
-* 库是没有状态的，也不能给库发送 Ether
-
-- 如果库函数都是 internal 的，库代码会嵌入到合约。 
-- 如果库函数有external或 public ，库需要单独部署，并在部署合约时进行链接，EVM 中使用委托调用库方法。
-- 给类型扩展功能：`Using lib for type`; 如： using Math for uint;
-
-
-
-
-
-------
-
-来 [DeCert.me](https://decert.me/quests/10003) 码一个未来，DeCert 让每一位开发者轻松构建自己的可信履历。
-
-
-DeCert.me 由登链社区 [@UpchainDAO](https://twitter.com/upchaindao) 孵化，欢迎 [Discord 频道](https://discord.com/invite/kuSZHftTqe) 一起交流。
-
-本教程来自贡献者 [@Tiny熊](https://twitter.com/tinyxiong_eth)。
+库是 [Solidity](https://learnblockchain.cn/course/93) 中实现代码复用的重要机制，可以让合约更加模块化和易于维护。
 

@@ -1,12 +1,9 @@
-# 开始编写合约
 
-前面介绍 [MetaMask](https://decert.me/tutorial/solidity/tools/metamask/) 和 [Remix](https://decert.me/tutorial/solidity/tools/remix) 使用时，我们了解了如何编译部署 Solidity智能合约。
+在[上一节](https://learnblockchain.cn/article/22528)中，你已经通过 Remix 实践了 Counter 合约的完整流程——从编写、编译、部署到调用。你可能已经成功让计数器加1了，但你是否真正理解了代码的每一行是什么含义呢？
 
-现在我们开始进入从代码逐步学习Solidity。 
+现在，让我们**从代码层面**深入学习 Solidity。我们将重新审视 Counter 合约，逐行解析它的结构和语法，帮助你真正掌握智能合约开发的基础知识。
 
-先来看看我们的第一个合约。
-
-## 第一个合约：Counter 
+## 理解 Counter 合约 
 
 ```solidity
 //SPDX-License-Identifier: MIT
@@ -35,11 +32,11 @@ contract Counter {
 
 合约是可部署到区块链的最小单元， 一个合约通常由**状态变量（合约数据）**和**合约函数**组成。
 
-> 在学习智能合约时，通常以 Counter 计数器作为入门合约，而不是通常打印 HelloWorld， 这个因为合约主要是用来处理状态的转换，另外，合约程序实际上是在节点上运行，因此是看不到打印输出的。
+> 在学习[智能合约](https://learnblockchain.cn/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6)时，通常以 Counter 计数器作为入门合约，而不是通常打印 HelloWorld。这是因为合约主要是用来处理状态的转换。另外，合约程序在节点 [EVM](https://learnblockchain.cn/tags/EVM?map=EVM) 上运行，不支持打印输出。
 
 
 
-##  声明编译器版本
+## 声明编译器版本
 
 编写合约首先要做的是声明编译器版本， 告诉编译器如何编译当前的合约代码，适合使用什么版本的编译器来编译。
 
@@ -49,7 +46,7 @@ contract Counter {
 pragma solidity >=0.8.0;
 ```
 
-它的含义是使用大于等于`0.8.0` 版本的编译编译 `Counter` 合约。类似的表示还有：
+它的含义是使用大于等于 `0.8.0` 版本的编译器编译 `Counter` 合约。类似的表示还有：
 
 ```solidity
 pragma solidity >=0.8.0 <0.9.0;
@@ -72,18 +69,13 @@ contract Counter {
 
 合约和其他语言的类（`class`）很类似。在Solidity中，合约本身也是一个数据类型， 称为合约类型。
 
-合约部署到链上后，使用[地址](https://decert.me/tutorial/solidity/ethereum/evm_core#%E8%B4%A6%E6%88%B7)来表示一个合约。
-
-
-
-合约由**状态变量（合约数据）**和**合约函数**组成。
+合约部署到链上后，使用[地址](https://learnblockchain.cn/article/22542#%E8%B4%A6%E6%88%B7%E5%92%8C%E5%9C%B0%E5%9D%80)来表示一个合约。
 
 > 合约还可以定义事件、自定义类型等，留在以后讨论。
 
 
 
 ### 合约构造函数
-
 
 
 构造函数是在创建合约时执行的一个特殊函数，其作用主要是用来初始化合约， `constructor` 关键字声明的一个构造函数。
@@ -97,7 +89,7 @@ contract Counter {
 下面是一个构造函数的示例代码： 
 
 ```solidity
-pragma solidity >=0.7.0;
+pragma solidity >=0.8.0;
 
 contract Base {
     uint x;
@@ -133,7 +125,7 @@ Solidity对函数和状态变量提供了4种可见性：`external`、`public`�
 
 声明为 `public` 的函数或变量，他们既可以在合约内部访问，也以合约接口形式暴露合约外部（其他合约或链下）调用。
 
-另外，`public` 类型的状态变量，会自动创建一个同名的外部函数（称为[访问器](https://learnblockchain.cn/docs/solidity/contracts.html#getter-functions)），来获取状态变量的值。
+另外，`public` 类型的状态变量，会自动创建一个同名的外部函数（称为[访问器（Getter）](https://learnblockchain.cn/docs/solidity/contracts.html#getter-functions)），用来获取状态变量的值。例如，`uint public value;` 会自动生成 `function value() external view returns (uint)` 函数。
 
 
 
@@ -160,13 +152,9 @@ contract Counter {
 }
 ```
 
-:::note
-
-前面有合约地址来调用函数， 即 `addr.fun()` 形式，这个方式称为外部调用。而 `func()`形式为内部调用。
-
-外部调用也称为消息调用，会切换上下文。内部调用则是在当前上下文里跳转。
-
-:::
+> **外部调用（消息调用）**：通过合约地址来调用函数，即 `addr.func()` 或 `this.func()` 形式。会创建新的执行环境，`msg.sender` 会变成调用者的地址。
+>
+> **内部调用**：直接使用 `func()` 形式调用。在当前执行环境中跳转，`msg.sender` 保持不变。
 
 
 
@@ -176,7 +164,7 @@ contract Counter {
 
 ### internal
 
-声明为 `internal` 函数和状态变量只能在当前合约中调用或者在[派生合约（子合约）](./16_is.md)里访问。
+声明为 `internal` 函数和状态变量只能在当前合约中调用或者在[派生合约（子合约）](https://learnblockchain.cn/article/22558)里访问。
 
 
 
@@ -184,19 +172,17 @@ contract Counter {
 
 
 
-声明为 `private` 函数和状态变量仅可在当前定义它们的合约中使用，并且不能被[派生合约](./16_is.md)使用。
+声明为 `private` 函数和状态变量仅可在当前定义它们的合约中使用，并且不能被[派生合约](https://learnblockchain.cn/article/22558)使用。
 
 这个有一个对比表格：
 
 ![solidity 函数可见性](https://img.learnblockchain.cn/pics/20230610124717.png!decert.logo.water)
 
-> 注意：派生的合约继承父合约中`external` 方法，只是无法在派生的合约里内部调用继承的`external` 方法，如需调用，需要使用外部调用方法。
+> 注意：派生的合约继承父合约中`external` 方法，只是无法在派生的合约里内部调用继承的`external` 方法，如需调用，需要使用外部调用方法。关于合约继承的详细内容，请参考[合约继承章节](https://learnblockchain.cn/article/22558)。
 
-:::note
+> 合约内的所有数据（包括公共及私有数据），即便私有数据无法通过合约访问，但在链上都是透明可见的，因此无法将某些函数或变量标记为`private`，来阻止其他人看到该数据。
 
-合约内的所有数据（包括公共及私有数据），即便私有数据无法通过合约访问，但在链上都是透明可见的，因此无法将某些函数或变量标记为`private`，来阻止其他人看到该数据。
-
-:::
+> **深入学习：** 关于函数可见性的详细对比、调用方式、[Gas](https://learnblockchain.cn/tags/Gas?map=EVM) 优化技巧等进阶内容，请参考[函数详解 - 函数可见性章节](https://learnblockchain.cn/article/22553)。
 
 
 
@@ -208,7 +194,7 @@ Solidity 是一个静态类型语言，在定义每个变量时，需要在声�
 uint public counter;
 ```
 
-这行代码声明了一个变量，变量名为 counter，类型为 [uint](./4_int.md)（一个256位的无符号整数），它是可以被公开访问的。
+这行代码声明了一个变量，变量名为 counter，类型为 [uint](https://learnblockchain.cn/article/22532)（一个256位的无符号整数），它是可以被公开访问的。
 
 定义变量按格式： `变量类型` `变量可见性` `变量名`。变量可见性是可选的，没有显示申明可见性时，会使用缺省值 `internal`。
 
@@ -231,17 +217,9 @@ contract C {
 
 使用`constant`修饰的状态变量，只能使用在编译时有确定值的表达式来给变量赋值。
 
-:::note
-
-因此任何通过访问存储数据、区块链数据（如`now`、`address(this).balance`或者`block.number`）或执行数据（`msg.value`或`gasleft()`）或对外部合约的调用来给它们赋值都是不允许的（因为它们的值无法在编译期确定）。
-
-不过对于内建函数，如`keccak256`、`sha256`、`ripemd160`、`ecrecover`、`addmod`和`mulmod`，是允许的（尽管它们调用的是外部预编译合约），如这句代码就是合法的：
-
-```
-bytes32 constant myHash = keccak256("abc");
-```
-
-:::
+> 因此任何通过访问存储数据、区块链数据（如`now`、`address(this).balance`或者`block.number`）或执行数据（`msg.value`或`gasleft()`）或对外部合约的调用来给它们赋值都是不允许的（因为它们的值无法在编译期确定）。
+>
+> 不过对于内建函数，如`keccak256`、`sha256`、`ripemd160`、`ecrecover`、`addmod`和`mulmod`，是允许的（尽管它们调用的是外部预编译合约）。例如：`bytes32 constant myHash = keccak256("abc");` 这句代码就是合法的。
 
 
 
@@ -281,6 +259,8 @@ contract Example {
 
 还记得么，合约由**状态变量（合约数据）**和**合约函数**组成，刚才介绍了定义变量，现在来看看定义函数：
 
+> **提示：** 本节介绍函数的基础知识。关于函数的更深入讲解，包括内部调用、外部调用、函数选择器等进阶内容，请参考[函数详解章节](https://learnblockchain.cn/article/22553)。
+
 ```solidity
     function count() public {
         counter = counter + 1;
@@ -305,7 +285,7 @@ function 函数名(<参数类型> <参数名>) <可见性> <状态可变性> [re
 
 ### 函数参数
 
-Solidity  中参数的声明方式与变量声明类似，如：
+[Solidity](https://learnblockchain.cn/tags/Solidity?map=EVM)  中参数的声明方式与变量声明类似，如：
 
 ```solidity
     function addAB(uint a, uint b) public {
@@ -337,26 +317,6 @@ function addAB(uint a, uint b) public returns (uint) {
     return counter + a + b;
 }
 ```
-
-
-
-Solidity 支持函数有多个返回值，例如：
-
-```solidity
-pragma solidity >0.5.0;
-contract C {
-		// highlight-next-line
-    function f() public pure returns (uint, bool, uint) {
-        return (7, true, 2);
-    }
-     function g() public {
-        // 获取返回值
-        // highlight-next-line
-        (uint x, bool b, uint y) = f();
-     }    
-}
-```
-
 
 
 ### 状态可变性（mutability）
@@ -396,10 +356,7 @@ contract C {
 
 此时 set 函数 的 gas 包含了 `cal`函数的 gas。
 
-我们可以这样理解：外部调用试图函数时 Gas 价格为0， 而在修改状态的函数中，Gas 价格随交易设定。
-
-
-
+我们可以这样理解：外部调用视图函数时 Gas 价格为 0，而在修改状态的函数中，Gas 价格随交易设定。
 
 
 如果在声明为`view`的函数中修改了状态，则编译器会报错误，除直接修改状态变量外，其他如：触发事件，发送代币等都会视为修改状态。详细可参考[Solidity文档](https://learnblockchain.cn/docs/solidity/contracts.html#state-mutability)。
@@ -408,7 +365,7 @@ contract C {
 
 前面提到 `public` 类型的状态变量，编译器会自动创建一个同名的外部视图函数（称为[访问器](https://learnblockchain.cn/docs/solidity/contracts.html#getter-functions)），来获取状态变量的值。
 
-如果状态变量的类型是[值类型](./3_types.md)，自动的访问器没有参数，直接返回状态变量的值， 例如：
+如果状态变量的类型是[值类型](https://learnblockchain.cn/article/22531) ，自动的访问器没有参数，直接返回状态变量的值， 例如：
 
 ```solidity
 pragma solidity >=0.8.0;
@@ -444,53 +401,44 @@ contract C {
 }
 ```
 
-
+> 以上介绍了函数的基础概念。要深入了解函数的可见性、内部调用与外部调用、函数重载、函数选择器等进阶知识，请阅读[函数详解章节](https://learnblockchain.cn/article/22553)。
 
 ## 练一练
 
 以下代码`set` 和 `get` 需要你补全功能，动手练习一下吧。
 
-```SolidityEditor
+**任务目标**：
+1. 实现 `set` 函数：将参数 `x` 的值赋给状态变量 `counter`
+2. 实现 `get` 函数：返回状态变量 `counter` 的当前值
+
+```Solidity
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract Counter {
     uint counter;
-    
+
     constructor() {
     }
-    
+
     // 如何给 counter 赋值
     function set(uint x) public {
-        
     }
-     
+
     // 如何返回  counter 变量
     function get() public view returns (uint) {
-        
+
     }
 }
 ```
 
 
-
 ## 小结
 
 提炼本节的重点：合约和类（`class`）很类似， 合约里可以定义多个变量及函数，变量和函数使用可见性来指示他们可以怎样的访问。
+函数添加状态可变性（mutability）来表明改函数是否会修改链上状态。
 
-合约函数还有一个状态可变性（mutability），用来限制它如何修改状态。
-
-这一节我们介绍了Solidity合约代码结构，我们准备了一个 [Solidity 基础测试题](https://decert.me/quests/10002)，挑战通过你就可以领取到一枚技能认证 NFT。 
+这一节我们介绍了Solidity合约代码结构，Decert 上有一个 [Solidity 基础测试题](https://decert.me/quests/10002)，挑战通过你就可以领取到一枚技能认证 NFT 。 
 
 学习 Solidity 不要忘了翻看 [Solidity 文档手册](https://learnblockchain.cn/docs/solidity/)
 
-
-
-\------
-
-来 [DeCert.me](https://decert.me/quests/10003) 码一个未来，DeCert 让每一位开发者轻松构建自己的可信履历。
-
-
-DeCert.me 由登链社区 [@UpchainDAO](https://twitter.com/upchaindao) 孵化，欢迎 [Discord 频道](https://discord.com/invite/kuSZHftTqe) 一起交流。
-
-本教程来自贡献者 [@Tiny熊](https://twitter.com/tinyxiong_eth)。

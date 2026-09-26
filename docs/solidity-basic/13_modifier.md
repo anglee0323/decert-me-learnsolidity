@@ -1,10 +1,6 @@
-# 函数修改器（modifier）
-
 ## 修改器作用
 
 函数修改器可以用来改变一个函数的行为，比如用于在函数执行前检查某种前置条件。
-
-
 
 函数修改器使用关键字 `modifier` , 以下代码定义了一个 `onlyOwner` 函数修改器， 然后使用修改器 `onlyOwner` 修饰 `transferOwner()` 函数：
 
@@ -84,7 +80,7 @@ contract testModifty {
 
  猜测一下，下面的例子执行`test1()` 后，a 的结果是什么？
 
-```SolidityEditor
+```Solidity
 contract modifysample {
     uint a = 10;
 
@@ -121,15 +117,15 @@ contract modifysample {
 
 
 
-因此上面的智能合约在运行test1()之后，状态变量a的值是多少？是1、11、12还是13呢？答案是11，大家可以运行`get_a`获取a的值。我们来分析一下`test1`函数，它扩展之后是这样的：
+因此上面的[智能合约](https://learnblockchain.cn/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6)在运行test1()之后，状态变量a的值是多少？是1、11、12还是13呢？答案是11，大家可以运行`get_a`获取a的值。我们来分析一下`test1`函数，它扩展之后是这样的：
 
 ```
 uint c = b;
-        uint c = a;
-            a = 12;
-            return ;
-            _;
-            a = 13;
+uint c = a;
+    a = 12;
+    return ;
+    _;
+    a = 13;
 c = a;
 a = 11;
 ```
@@ -137,15 +133,12 @@ a = 11;
 这个时候就一目了然了，最后a为11。
 
 
-
 ## 修改器可继承
 
-修改器也是可被[继承](./16_is.md)的，同时还可被继承合约重写（Override）。例如：
+修改器也是可被[继承](https://learnblockchain.cn/article/22558)的，同时还可被继承合约重写（Override）。例如：
 
 ```solidity
 contract mortal is owned {
-
-
     // 只有在合约里保存的owner调用close函数，才会生效
     function close() public onlyOwner {
         selfdestruct(owner);
@@ -156,25 +149,18 @@ contract mortal is owned {
 `mortal`合约从上面的`owned`继承了`onlyOwner`修饰符，并将其应用于close函数。
 
 
-
-
-
 ## 小结
 
-函数修改器是一个语法糖，同来给修饰的函数添加一些额外的功能或检查。
+- **函数修改器定义**：使用 `modifier` 关键字定义，用来给修饰的函数添加额外的功能或检查
+- **`_` 占位符**：表示被修饰函数的执行位置
+- **修改器特性**：可以带参数、可以嵌套使用、可以被继承和重写
+- **常用场景**：权限控制、输入条件检查、重入控制、防止重复初始化
 
-常用于如：检查输入条件、权限控制、重入控制、防止重复初始化等场景。
+函数修改器是一个强大的语法糖，可以让代码更加简洁和易读，避免重复代码。
 
+### 进阶学习
 
+想了解更多关于函数修改器的知识，可以参考：
 
-------
-
-来 [DeCert.me](https://decert.me/quests/10003) 码一个未来，DeCert 让每一位开发者轻松构建自己的可信履历。
-
-
-DeCert.me 由登链社区 [@UpchainDAO](https://twitter.com/upchaindao) 孵化，欢迎 [Discord 频道](https://discord.com/invite/kuSZHftTqe) 一起交流。
-
-本教程来自贡献者 [@Tiny熊](https://twitter.com/tinyxiong_eth)。
-
-
-
+- [访问控制](https://learnblockchain.cn/article/22671) - 学习使用修改器实现完善的权限控制
+- [重入攻击防护](https://learnblockchain.cn/article/22675) - 学习使用修改器防范重入攻击

@@ -1,6 +1,4 @@
-# 接口及合约交互
-
-在上一节[继承](./16_is.md)中，我们已经理解了一些抽象的概念：把各个合约都拥有的功能，作为统一接口在父合约里提供，让所有的子合约都可以继承。
+在上一节[继承](https://learnblockchain.cn/article/22558)中，我们已经理解了一些抽象的概念：把各个合约都拥有的功能，作为统一接口在父合约里提供，让所有的子合约都可以继承。
 
 接口（Interface）则更进一步，是一种定义了一组**抽象方法的规范**，接口描述了一组兑现应该具有哪些方法，但并不提供这些方法的具体实现。
 
@@ -26,7 +24,7 @@
 
 ## 使用接口
 
-Solidity 用`Interface` 关键字定义接口，以下是一段示例代码定义了一个名为`ICounter` 的接口：
+[Solidity](https://learnblockchain.cn/course/93) 用`Interface` 关键字定义接口，以下是一段示例代码定义了一个名为`ICounter` 的接口：
 
 ```solidity
 pragma solidity ^0.8.10;
@@ -100,7 +98,7 @@ contract MyContract {
 
 
 
-高亮代码`ICounter(_counter).increment();`  的含义是：把合约地址 `_counter`  类型转化为接口`ICounter`类型（接口类型与[合约类型](./6_contract.md)一样，也是自定义类型），再调用接口内的`increment()` 方法。
+高亮代码`ICounter(_counter).increment();`  的含义是：把合约地址 `_counter`  类型转化为接口`ICounter`类型（接口类型与[合约类型](https://learnblockchain.cn/article/22561)一样，也是自定义类型），再调用接口内的`increment()` 方法。
 
 
 
@@ -131,7 +129,7 @@ contract MyContract {
 
 合约间的交互，使用非常广泛，因此，这里再举一个示例：实现一个奖励合约，给用户发放 ERC20 代币奖励。
 
-ERC20 代币如下：
+[ERC20](https://learnblockchain.cn/tags/ERC20?map=EVM) 代币如下：
 
 ```solidity
 pragma solidity ^0.8.9;
@@ -155,7 +153,7 @@ contract MyToken is ERC20 {
 contract Award {
   IERC20 immutable token;
   // 部署时传入 MyToken 合约地址
-  constrcutor(address t) {
+  constructor(address t) {
      token = IERC20(t);
   }
 
@@ -175,30 +173,23 @@ contract Award {
 
 
 
-## 小结 
+## 小结
 
-本文，我们学习了接口的概念：接口是一组**抽象方法的规范**，在合约间相互调用时，应该**依赖接口，而不是依赖实现**。
+- **接口定义**：使用 `interface` 关键字定义，是一组抽象方法的规范
+- **设计原则**：在合约间相互调用时，应该依赖接口而不是依赖实现（依赖倒置原则）
+- **接口特点**：
+  - 所有函数都必须是 external
+  - 不能有构造函数
+  - 不能有状态变量
+  - 不能继承其他合约（但可以继承其他接口）
+- **使用方式**：接口也是一个类型，通过将地址转换为接口类型，即可调用相应的函数
 
-接口使用 `interface` 来定义，接口也是一个类型，在合约间相互调用时，我们把地址（合约实例）转化为接口，再调用相应的函数。
+接口是合约间交互的标准方式，使用接口可以降低耦合度，提高代码的可维护性和可扩展性。
 
+### 进阶学习
 
+想了解更多关于接口的知识，可以参考：
 
-
-
-------
-
-来 [DeCert.me](https://decert.me/quests/10003) 码一个未来，DeCert 让每一位开发者轻松构建自己的可信履历。
-
-
-DeCert.me 由登链社区 [@UpchainDAO](https://twitter.com/upchaindao) 孵化，欢迎 [Discord 频道](https://discord.com/invite/kuSZHftTqe) 一起交流。
-
-本教程来自贡献者 [@Tiny熊](https://twitter.com/tinyxiong_eth)。
-
-
-
-
-
-
-
-
-
+- [ERC20 标准](https://learnblockchain.cn/article/22659) - 学习如何实现 [ERC20](https://learnblockchain.cn/tags/ERC20?map=EVM) 接口
+- [ERC721 标准](https://learnblockchain.cn/article/22660) - 学习 [NFT](https://learnblockchain.cn/tags/NFT) 接口的实现
+- [跨合约调用](https://learnblockchain.cn/article/22616) - 深入理解合约间的交互方式
